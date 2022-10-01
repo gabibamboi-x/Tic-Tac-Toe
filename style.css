@@ -1,10 +1,11 @@
 body {
-  margin: 0;
+  position: relative;
   height: 100vh;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
 
 .welcome {
@@ -13,12 +14,6 @@ body {
   justify-content: center;
   align-items: center;
   font-size: 2rem;
-}
-
-p {
-  margin-top: 10%;
-  font-size: 10rem;
-  margin-bottom: 20px;
 }
 
 .game-mode {
@@ -49,24 +44,44 @@ p {
 
 #play {
   font-size: 40px;
+  border-radius: 10px;
 }
 
 .wrapper {
-  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  visibility: hidden;
+}
+
+.updates {
+  height: 30px;
+  text-align: center;
+  margin-block: 10%;
 }
 
 .main-board {
-  width: 150px;
+  width: 12em;
+  font-size: 30px;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
+  grid-template-columns: 1fr 1fr 1fr;
+  margin-bottom: 10%;
 }
 
 .selection {
-  height: 50px;
-  border: 1px solid black;
+  height: 4em;
+  border: .5px solid black;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 15px;
+}
+
+.boardOptions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10%;
 }
