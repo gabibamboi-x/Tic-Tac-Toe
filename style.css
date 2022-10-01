@@ -28,6 +28,29 @@ p {
   gap: 10px;
 }
 
+.inputName {
+  display: flex;
+  gap: 10px;
+  flex-direction: column;
+  align-items: center;
+}
+
+#player1,
+#player2 {
+  display: none;
+}
+
+.alertMissing {
+  font-size: 15px;
+  height: 20px;
+  padding-block: 5px;
+  color: red;
+}
+
+#play {
+  font-size: 40px;
+}
+
 .wrapper {
   display: none;
 }
