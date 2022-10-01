@@ -1,38 +1,84 @@
 (function() {
 
+  let turn = 1
+
   const Player = (name, template) => {
     return {name, template}
   }
 
+  
+  const displayController = (function(){
+    let currentSelection;
 
-  let turn = 1
+    // cache DOM
+    const startingPage = document.querySelector('.welcome')
+    const gameMode = document.querySelectorAll('.selectionButton')
+    const nameP1 = document.querySelector('#player1')
+    const nameP2 = nameP1.nextElementSibling
+    const playBtn = startingPage.lastChild.previousSibling
+    const alertMissing = playBtn.previousSibling.previousSibling
 
-  const gameboard = ['', '', '', '', '', '', '', '', '']
-  const gameBoard = {
-    init: function(){
-      this.cacheDOM()
-      this.bindEvents()
-      this.render()
-    },
+    // bind events
+    gameMode.forEach(el => (el.addEventListener('click', modeSelection)))
+    playBtn.addEventListener('click', prepareGame)
 
-    cacheDOM: function(){
-      this.mainBoard = document.querySelector('.main-board')
-      this.piece = this.mainBoard.querySelectorAll('.selection')
-    },
+    function modeSelection(event) {
+      if (event.target.id === '2P') {
+        nameP1.style.display = 'flex'
+        nameP2.style.display = 'flex'
+        currentSelection = '2P'
+      } else {
+        nameP1.style.display = 'flex'
+        nameP2.style.display = 'none'
+        currentSelection = 'AI'
+      }
+    }
 
-    render: function(){
+    function prepareGame() {
+      if (!currentSelection) {
+        alertMissing.textContent = 'Select a game mode!'
+      } else if (currentSelection === '2P' && nameP1.checkValidity() 
+        && nameP2.checkValidity()) {
+        alertMissing.textContent = ''
+        return {
+          player1: Player(nameP1.value, 'X'),
+          player2: Player(nameP2.value, 'O')
+        }
+      } else if (currentSelection === 'AI' && nameP1.checkValidity()) {
+        alertMissing.textContent = ''
+        return {
+          player1: Player(nameP1.ariaValueMax, 'X'),
+          player2: 'AI'
+        }
+      } else {
+      alertMissing.textContent = 'Please enter your name!'
+      }
+    }
+
+
+  })()
+
+  const gameBoard = (function(){
+
+    const players = []
+    const gameboard = ['', '', '', '', '', '', '', '', '']
+
+    //cache DOM
+    const mainBoard = document.querySelector('.main-board')
+    const piece = mainBoard.querySelectorAll('.selection')
+
+    // bind events 
+    mainBoard.addEventListener('click', addSelection)
+
+    function render(){
       let i = 0
-      this.piece.forEach(el => {
+      piece.forEach(el => {
         el.innerHTML = gameboard[i]
         i++
       });
-    },
+    }
 
-    bindEvents: function(){
-      this.mainBoard.addEventListener('click', this.addSelection)
-    },
-
-    addSelection: function(event){
+    function addSelection(event){
       const selection =  event.target.id
       const pieceStatus = event.target.innerHTML
 
@@ -45,9 +91,13 @@
         gameboard[selection] = 'O'
         turn = 1
       }
-    },
-  }
+    }
 
-  gameBoard.init()
+    return {
+      render: render
+    }
+  })()
+
+  gameBoard.render()
 
 })()
