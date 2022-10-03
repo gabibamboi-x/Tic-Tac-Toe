@@ -7,9 +7,9 @@
 
   // cache DOM
   const startingPage = document.querySelector('.welcome')
-  const gameMode = document.querySelectorAll('.selectionButton')
   const nameP1 = document.querySelector('#player1')
   const wrapper = startingPage.nextElementSibling
+  const updateTab = wrapper.firstElementChild
   const nameP2 = nameP1.nextElementSibling
   const playBtn = startingPage.lastElementChild
   const alertMissing = playBtn.previousElementSibling
@@ -17,22 +17,19 @@
   const players = []
 
   const displayController = (function(){
-    let currentSelection;
 
     // bind events
-    gameMode.forEach(el => (el.addEventListener('click', modeSelection)))
     playBtn.addEventListener('click', prepareGame)
+    window.addEventListener('keydown', clickBtn)
+    nameP1.addEventListener('input', animate)
+    nameP2.addEventListener('input', animate)
 
-    function modeSelection(event) {
-      // check for selected mode and ask for names
-      if (event.target.id === '2P') {
-        nameP1.style.display = 'flex'
-        nameP2.style.display = 'flex'
-        currentSelection = '2P'
+    function animate() {
+      if (nameP1.checkValidity() && nameP2.checkValidity()) {
+        playBtn.style.boxShadow = 'inset 200px 0 0 green'
+        alertMissing.textContent = ''
       } else {
-        nameP1.style.display = 'flex'
-        nameP2.style.display = 'none'
-        currentSelection = 'AI'
+        playBtn.style.boxShadow = 'inset 0 0 0 white'
       }
     }
 
@@ -40,33 +37,30 @@
       // reset the players by emptying the array
       players.splice(0, players.length)
 
-      // currentSelection will be available as soon as the user
-      // selects a mode, if there hasn't been one selected and error is shown
-      if (!currentSelection) {
-        alertMissing.textContent = 'Select a game mode!'
-        // the mode has to be 2P and both name input valid to continue
-      } else if (currentSelection === '2P' && nameP1.checkValidity() 
-        && nameP2.checkValidity()) {
+      // check for valid names
+      if (nameP1.checkValidity() && nameP2.checkValidity()) {
         switchDisplay()
         // add the players name to the array for later use
         players.push(Player(nameP1.value, 'X'), Player(nameP2.value, 'O'))
-        // for the ai mode only one name is required
-      } else if (currentSelection === 'AI' && nameP1.checkValidity()) {
-        switchDisplay()
-        players.push(Player(nameP1.value, 'X'), Player('AI', 'O'))
       } else {
-      alertMissing.textContent = 'Please enter your name!'
+        alertMissing.textContent = 'Please enter your names!'
       }
     }
 
-    // swap the wrapper with the starting page by swapping their 
+    // add ability to start the game by pressing 
+    function clickBtn(event) { 
+      if (event.key === 'Enter') {
+        playBtn.click()
+      }
+    }
+
+    // switch the wrapper with the starting page by swapping their 
     // z-index and thr visibility
     function switchDisplay() {
+      playBtn.style.display = 'none'
       alertMissing.textContent = ''
-      wrapper.style.visibility = 'visible'
-      wrapper.style.zIndex = '1'
-      startingPage.style.visibility = 'hidden'
-      startingPage.style.zIndex = '-1'
+      wrapper.style.display = 'flex'
+      startingPage.style.display = 'none'
     }
   })()
 
@@ -87,59 +81,122 @@
     cacheDOM: function(){
       this.mainBoard = document.querySelector('.main-board')
       this.piece = this.mainBoard.querySelectorAll('.selection')
-      this.updateTab = this.mainBoard.previousElementSibling
       this.home = this.mainBoard.nextElementSibling.firstElementChild
       this.reset = this.home.nextElementSibling
     },
 
     // bind events 
     bindEvents: function(){
-      this.mainBoard.addEventListener('click', this.addSelection.bind(this), false)
-      this.home.addEventListener('click', this.backToStartingPage)
+      this.addSelection = this.registerMove.bind(this)
+      this.mainBoard.addEventListener('click', this.addSelection, false)
+      this.home.addEventListener('click', this.backToStartingPage.bind(this), false)
       this.reset.addEventListener('click', this.resetBoard.bind(this), false)
+      window.addEventListener('keydown', this.keyboardActions.bind(this))
     },
 
     render: function(){
       let i = 0
       this.piece.forEach(el => {
-        el.innerHTML = this.gameboard[i]
+        if (this.gameboard[i] === 'X') {
+          el.innerHTML = `<img src='./Images/x.png'>`
+        } else if (this.gameboard[i] === 'O'){
+          el.innerHTML = `<img src='./Images/o.png'>`
+        } else {
+          el.innerHTML = ''
+        }
         i++
-      });
+      })
     },
 
-    addSelection: function(event){
-      const selection =  event.target.id
+    registerMove: function(event){
+      const selection = event.target.id
       const pieceStatus = event.target.innerHTML
 
       // check for whose turn it is and if the piece is empty
       if (turn === 1 && pieceStatus === '') {
-        event.target.innerHTML = players[0].template
+        event.target.innerHTML = `<img src='./Images/x.png'>`
         // add the new selection to the board and update the banner with info
         this.gameboard[selection] = players[0].template
-        this.updateTab.textContent = players[1].name + '\'s turn'
+        updateTab.textContent = players[1].name + '\'s turn'
+        this.checkWinner()
         turn = 2
       } else if (turn === 2 && pieceStatus === '') {
-        event.target.innerHTML = players[1].template
+        event.target.innerHTML = `<img src='./Images/o.png'>`
         this.gameboard[selection] = players[1].template
-        this.updateTab.textContent = players[0].name + '\'s turn'
+        updateTab.textContent = players[0].name + '\'s turn'
+        this.checkWinner()
         turn = 1
       }
     },
 
+    backToStartingPage: function() { 
+      playBtn.style.display = ''
+      startingPage.style.display = ''
+      wrapper.style.display = 'none'
+      this.resetBoard()
+    },
+
     resetBoard: function(){
-      for (let i = 0; i < 9; i++){
-        this.gameboard[i] = ''
-      };
+      for (let i = 0; i < 9; i++) {
+          this.gameboard[i] = ''
+        }
       turn = 1
-      this.updateTab.textContent = players[0].name + '\'s turn'
+      updateTab.textContent = players[0].name + '\'s turn'
+      updateTab.style.backgroundColor = ''
+      this.mainBoard.addEventListener('click', this.addSelection, false)
       this.render()
     },
 
-    backToStartingPage: function() {
-      wrapper.style.visibility = 'hidden'
-      wrapper.style.zIndex = '-1'
-      startingPage.style.visibility = 'visible'
-      startingPage.style.zIndex = '1'
+    checkWinner: function(){ 
+      const winCombos = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6],
+      ]
+
+      // alert the winner
+      for (let x = 0; x < 8; x++) {
+        if (this.gameboard[winCombos[x][0].toString()] === this.gameboard[winCombos[x][1].toString()] && 
+            this.gameboard[winCombos[x][1].toString()] === this.gameboard[winCombos[x][2].toString()] && 
+            this.gameboard[winCombos[x][1].toString()] !== '') {
+          this.alertWinner(this.gameboard[winCombos[x][0]])
+        }
+      }
+
+      // Tie
+      if (!this.gameboard.includes('')){
+        updateTab.textContent ='...'
+
+        function update(){
+          updateTab.textContent ='It\'s a tie!'
+        }
+
+        setTimeout(update, 750)
+      }
+    },
+
+    alertWinner: function(x){
+      if (x === 'X') {
+        updateTab.textContent = players[0].name.toUpperCase() + ' WON THE GAME'
+        this.mainBoard.removeEventListener('click', this.addSelection, false)
+      } else {
+        updateTab.textContent = players[1].name.toUpperCase() + ' WON THE GAME'
+        this.mainBoard.removeEventListener('click', this.addSelection, false)
+      }
+      updateTab.style.backgroundColor = 'green'
+    },
+
+    keyboardActions: function(event){
+      if (event.key === 'Escape'){
+        this.backToStartingPage()
+      } else if (event.key === 'r') {
+        this.resetBoard()
+      }
     }
   }
 
