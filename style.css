@@ -192,6 +192,10 @@ a img {
     padding-bottom: 50px;
   }
 
+  .updates {
+    font-size: 22px;
+  }
+
   .main-board {
     width: 270px;
     padding-block: 30px;
