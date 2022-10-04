@@ -42,6 +42,7 @@
         switchDisplay()
         // add the players name to the array for later use
         players.push(Player(nameP1.value, 'X'), Player(nameP2.value, 'O'))
+        updateTab.textContent = players[0].name + '\'s turn'
       } else {
         alertMissing.textContent = 'Please enter your names!'
       }
@@ -97,13 +98,7 @@
     render: function(){
       let i = 0
       this.piece.forEach(el => {
-        if (this.gameboard[i] === 'X') {
-          el.innerHTML = `<img src='./Images/x.png'>`
-        } else if (this.gameboard[i] === 'O'){
-          el.innerHTML = `<img src='./Images/o.png'>`
-        } else {
-          el.innerHTML = ''
-        }
+        el.innerHTML = this.gameboard[i]
         i++
       })
     },
@@ -114,14 +109,14 @@
 
       // check for whose turn it is and if the piece is empty
       if (turn === 1 && pieceStatus === '') {
-        event.target.innerHTML = `<img src='./Images/x.png'>`
+        event.target.innerHTML = players[0].template
         // add the new selection to the board and update the banner with info
         this.gameboard[selection] = players[0].template
         updateTab.textContent = players[1].name + '\'s turn'
         this.checkWinner()
         turn = 2
       } else if (turn === 2 && pieceStatus === '') {
-        event.target.innerHTML = `<img src='./Images/o.png'>`
+        event.target.innerHTML = players[1].template
         this.gameboard[selection] = players[1].template
         updateTab.textContent = players[0].name + '\'s turn'
         this.checkWinner()
@@ -170,9 +165,11 @@
 
       // Tie
       if (!this.gameboard.includes('')){
+        this.checkWinner()
         updateTab.textContent ='...'
 
         function update(){
+          updateTab.style.backgroundColor = 'green'
           updateTab.textContent ='It\'s a tie!'
         }
 
