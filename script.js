@@ -154,18 +154,19 @@
         [2, 4, 6],
       ]
 
+      let winStatus = false
       // alert the winner
       for (let x = 0; x < 8; x++) {
         if (this.gameboard[winCombos[x][0].toString()] === this.gameboard[winCombos[x][1].toString()] && 
             this.gameboard[winCombos[x][1].toString()] === this.gameboard[winCombos[x][2].toString()] && 
             this.gameboard[winCombos[x][1].toString()] !== '') {
           this.alertWinner(this.gameboard[winCombos[x][0]])
+          winStatus = true
         }
       }
 
       // Tie
-      if (!this.gameboard.includes('')){
-        this.checkWinner()
+      if (!this.gameboard.includes('') && winStatus === false){
         updateTab.textContent ='...'
 
         function update(){
