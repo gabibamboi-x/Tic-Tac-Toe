@@ -48,15 +48,13 @@
       }
     }
 
-    // add ability to start the game by pressing 
+    // add ability to start the game by pressing Enter
     function clickBtn(event) { 
       if (event.key === 'Enter') {
         playBtn.click()
       }
     }
 
-    // switch the wrapper with the starting page by swapping their 
-    // z-index and thr visibility
     function switchDisplay() {
       playBtn.style.display = 'none'
       alertMissing.textContent = ''
@@ -165,7 +163,7 @@
         }
       }
 
-      // Tie
+      // If the table is full alert tie
       if (!this.gameboard.includes('') && winStatus === false){
         updateTab.textContent ='...'
 
